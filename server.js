@@ -1,4 +1,40 @@
+
 const express = require('express');
+const app = express();
+
+app.use(express.static(__dirname));
+
+const http = require('http').createServer(app);
+
+const io = require('socket.io')(http, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST']
+  }
+});
+
+io.on('connection', (socket) => {
+  console.log('Jogador conectado:', socket.id);
+
+  socket.on('jogo1_comando', (dados) => {
+    socket.broadcast.emit('jogo1_atualizar', dados);
+  });
+
+  socket.on('jogo2_comando', (dados) => {
+    socket.broadcast.emit('jogo2_atualizar', dados);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('Jogador desconectado:', socket.id);
+  });
+});
+
+const PORT = process.env.PORT || 3000;
+
+http.listen(PORT, () => {
+  console.log('Servidor de jogos funcionando na porta:', PORT);
+});
+ express = require('express');
 const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
