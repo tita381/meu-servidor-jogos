@@ -11,6 +11,86 @@
             margin: 0;
             height: 100vh;
             display: flex;
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Servidor Central de Jogos</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 24px;
+      background: #101820;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    h1 { color: #55e6a5; }
+    button {
+      padding: 14px 22px;
+      margin: 10px;
+      border: 0;
+      border-radius: 10px;
+      background: #55e6a5;
+      color: #101820;
+      font-size: 16px;
+      font-weight: bold;
+    }
+    #status { margin: 24px 0; font-size: 18px; }
+  </style>
+</head>
+<body>
+  <h1>Servidor Central de Jogos</h1>
+  <p>Teste de conexão multiplayer</p>
+  <div id="status">Conectando ao servidor...</div>
+  <button id="testar">Testar conexão</button>
+  <button id="enviar">Enviar teste multiplayer</button>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const status = document.getElementById('status');
+    const socket = io();
+
+    socket.on('connect', () => {
+      status.textContent = 'Conectado! ID: ' + socket.id;
+    });
+
+    socket.on('connect_error', () => {
+      status.textContent = 'Não foi possível conectar.';
+    });
+
+    socket.on('disconnect', () => {
+      status.textContent = 'Desconectado do servidor.';
+    });
+
+    document.getElementById('testar').onclick = () => {
+      status.textContent = socket.connected
+        ? 'Conexão funcionando!'
+        : 'Ainda sem conexão.';
+    };
+
+    document.getElementById('enviar').onclick = () => {
+      if (socket.connected) {
+        socket.emit('jogo1_comando', {
+          mensagem: 'Teste multiplayer',
+          jogador: socket.id
+        });
+        status.textContent = 'Mensagem de teste enviada!';
+      } else {
+        status.textContent = 'Conecte-se ao servidor primeiro.';
+      }
+    };
+
+    socket.on('jogo1_atualizar', (dados) => {
+      if (dados.jogador !== socket.id) {
+        status.textContent = 'Outro jogador enviou: ' + dados.mensagem;
+      }
+    });
+  </script>
+</body>
+</html>
+
             flex-direction: column;
             justify-content: center;
             align-items: center;
