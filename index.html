@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Jogo Online</title>
+    <!-- Importa a biblioteca para conectar ao servidor -->
+    <script src="https://socket.io"></script>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #222;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        #status { font-size: 18px; margin-bottom: 20px; }
+        #log { font-size: 24px; font-weight: bold; color: #00ffcc; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div id="status">Conectando ao servidor...</div>
+    <div id="log">Toque na tela para testar!</div>
+
+    <script>
+        // SUBSITUA PELO LINK QUE O RENDER VAI TE DAR (Ex: https://onrender.com)
+        const URL_DO_SERVIDOR = "http://localhost:3000"; 
+
+        // Conecta ao servidor do Render
+        const socket = io(URL_DO_SERVIDOR);
+
+        const statusDiv = document.getElementById('status');
+        const logDiv = document.getElementById('log');
+
+        // Quando consegue conectar com sucesso
+        socket.on('connect', () => {
+            statusDiv.innerText = "🟢 Conectado ao Servidor!";
+            statusDiv.style.color = "#00ff00";
+        });
+
+        // Quando cai a internet ou o servidor desliga
+        socket.on('disconnect', () => {
+            statusDiv.innerText = "🔴 Desconectado!";
+            statusDiv.style.color = "#ff0000";
+        });
+
+        // Quando o celular detecta um toque na tela, envia um aviso pro servidor
+        document.body.addEventListener('click', () => {
+            socket.emit('clique_tela', { timestamp: Date.now() });
+        });
+
+        // Fica ouvindo o servidor. Quando o servidor mandar 'atualizar_jogo'...
+        socket.on('atualizar_jogo', (dados) => {
+            // Atualiza o texto na tela do celular de todo mundo que está com o app aberto!
+            logDiv.innerText = `${dados.mensagem}\n(ID: ${dados.idJogador.substring(0,5)})`;
+            
+            // Muda a cor do fundo aleatoriamente para dar um efeito visual
+            document.body.style.backgroundColor = '#' + Math.floor(Math.random()*16777215).toString(16);
+        });
+    </script>
+</body>
+</html>
